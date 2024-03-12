@@ -20,7 +20,9 @@ taskRouter.get('/', async (req, res) => {
   const githubIssues = await getAuthenticatedUserIssues()
 
   const issues = githubIssues.map((issue) => {
-    const { number, title, body, labels: issueLabels, html_url: htmlUrl } = issue
+    const { number, title, body, labels: issueLabels, html_url: htmlUrl, repository } = issue
+
+    const { name, owner: { login } } = repository
 
     const githubLabel = issueLabels.map((label) => label.name)[0]
     const type = TYPES[githubLabel] ?? TYPES.bug
@@ -34,12 +36,14 @@ taskRouter.get('/', async (req, res) => {
       type,
       priority,
       sprint,
+      repo: name,
+      owner: login,
       url: htmlUrl
     }
   })
 
   issues.forEach(async (issue) => {
-    const { title } = issue
+    const { title, id, owner, repo } = issue
     const isUnique = await isPageExist({
       databaseId,
       name: title
@@ -51,11 +55,7 @@ taskRouter.get('/', async (req, res) => {
         item: issue
       })
 
-      await closeIssue({
-        id: issue.id,
-        owner: 'jrodolforojas',
-        repo: 'libertadfinanciera'
-      })
+      await closeIssue({ id, owner, repo })
     }
   })
 
