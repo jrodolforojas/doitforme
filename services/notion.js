@@ -1,8 +1,12 @@
 import { Client } from '@notionhq/client'
 
-export const getDatabaseItems = async ({ databaseId }) => {
+const createClient = () => {
   const token = process.env.NOTION_API_KEY ?? ''
-  const notion = new Client({ auth: token })
+  return new Client({ auth: token })
+}
+
+export const getDatabaseItems = async ({ databaseId }) => {
+  const notion = createClient()
   const response = await notion.databases.query({
     database_id: databaseId
   })
@@ -11,8 +15,7 @@ export const getDatabaseItems = async ({ databaseId }) => {
 }
 
 export const getPage = async ({ pageId }) => {
-  const token = process.env.NOTION_API_KEY ?? ''
-  const notion = new Client({ auth: token })
+  const notion = createClient()
   const response = await notion.pages.retrieve({
     page_id: pageId
   })
@@ -20,10 +23,8 @@ export const getPage = async ({ pageId }) => {
   return response
 }
 
-export const isPageExist = async ({ databaseId, name }) => {
-  const token = process.env.NOTION_API_KEY ?? ''
-  const notion = new Client({ auth: token })
-
+export const isPageUnique = async ({ databaseId, name }) => {
+  const notion = createClient()
   const sameItemsDatabase = await notion.databases.query({
     database_id: databaseId,
     filter: {
@@ -38,9 +39,7 @@ export const isPageExist = async ({ databaseId, name }) => {
 }
 
 export const addPageToDatabase = async ({ databaseId, item }) => {
-  const token = process.env.NOTION_API_KEY ?? ''
-  const notion = new Client({ auth: token })
-
+  const notion = createClient()
   const response = await notion.pages.create({
     parent: {
       type: 'database_id',
