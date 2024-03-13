@@ -1,0 +1,23 @@
+name: Issue Assigned Event
+
+on:
+  issues:
+    types:
+      - assigned
+
+jobs:
+  notify_on_issue_assignment:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v2
+
+    - name: Check if assigned by me
+      run: |
+        if [ "${{ github.event.issue.assignee.login }}" == "jrodolforojas" ]; then
+          echo "The issue has been assigned to you: ${{ github.event.issue.title }}"
+          curl -X GET https://doitforme.up.railway.app/tasks
+        else
+          echo "No issues assigned to you in this repository."
+        fi
